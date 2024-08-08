@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <script src="https://kit.fontawesome.com/eea6921c5e.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <title>Music App</title>
+</head>
+
+<body style="padding: 0%; margin: 0%;">
+  <nav class="navbar shadow sticky-top navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid justify-content-between">
+      <a class="navbar-brand" href="#">Music Streaming</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mx-auto">
+          <div class="d-none d-lg-flex">
+            <input class="form-control me-2 dropdown-toggle" type="search" placeholder="&#xF002; Search" aria-label="Search"
+              style=" width: 35rem;z-index: 1; font-family:Arial, Helvetica, sans-serif,FontAwesome;" id="search11" data-bs-toggle="dropdown">
+              <ul class="dropdown-menu row" aria-labelledby="search11" id ='ul' data-bs-auto-close="true" aria-expanded="false" style="width: 35rem;left: 30%;top: 85%;">
+                <div class="col-4">
+                  <li><h6 class="dropdown-header">TRENDING NOW</h6></li>
+                </div>
+              </ul>
+            </div>
+        </div>
+        <div class="navbar-nav">
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
+          <!-- disabled -->
+          {%if username == "none" %}
+          <a class="nav-link disabled" href="/creator" tabindex="-1" aria-disabled="true">Creator</a>
+          <a class="nav-link" href="/signin">Login</a>
+          {% else %}
+          <a class="nav-link" href="/creator" tabindex="-1" aria-disabled="true">Creator</a>
+          <a class="nav-link" href="/logout">{{username}}</a>
+          {% endif%}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div id="response"></div>
+  <section id="album" class="pt-5 mt-5 px-5 mx-5 row">
+    <div class="d-flex col-4">
+      <div class="d-flex justify-content-center">
+        <img src="data:image/jpg;base64,{{ image_blob | decodeutf8}}"  class="shadow " alt="" style="width: 70%;"/>
+      </div>
+
+    </div>
+    <div class="col-8">
+      <div class="h4">
+        {{ album['name'] }}
+      </div>
+      <div class="">
+        by {{album['artist']}} . {{album['count'] }} Songs .
+      </div>
+      <div>
+        &#169; {{album['artist']}}
+      </div>
+      <button type="button" class="btn btn-success mt-4 rounded-pill p-2 fs-4 px-4">Play</button>
+      <button type="button" class="btn btn-light mt-4 mx-4  rounded-circle fs-4 "><i class="fa-regular fa-heart"></i></button>
+    </div>
+    <div class="container my-5">
+      <table class="px-5 mx-5  table table-hover table-borderless ">
+        <tbody>
+          {% for i in range(album['count']) %}
+          <tr>
+            <th scope="row">{{i+1}}</th>
+            <td>{{ album['songs'][i]['name'] }}</td>
+            <td>{{ album['songs'][i]['author'] }}</td>
+            <td>{{ album['songs'][i]['views'] }}</td>
+            <td><i class="fa-regular fa-heart"></i></td>
+            <td>{{ album['songs'][i]['duration'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>  
+    </div>
+  </section>
+  <nav class="navbar fixed-bottom navbar-light bg-light p-0">
+    <div class="col-12">
+      <div class="slider" id="myRange" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress bg-success progress-bar-striped progress-bar-animated" id="progressBar"></div>
+      </div>
+    </div>
+    <div class="container-fluid  p-3 py-2 ">
+      <div class="col-1">
+        <img src="{{url_for('static', filename='img/sample.avif')}}"  style="width: 45%;"/>
+      </div>
+      <div class="col-2" style="margin-left: -3%;">
+        <div style="font-size: x-small;">
+          <h6>Leke Prabhu Ka Naam</h6>
+        </div>
+        <div style="font-size: x-small;">
+          Pritam, Arijit Singh, Nikhita Gandhi, Amitabh Bhattacharya
+        </div>
+      </div>
+      <div class="mx-auto">
+        <i class="fa-solid fa-repeat ps-2 mx-1"></i>
+        <i class="fa-solid fa-backward-fast px-2"></i>
+        <i class="fa-solid fa-play px-2" id="masterPlay"></i>
+        <!-- <i class="fa-solid fa-pause"></i> -->
+        <i class="fa-solid fa-forward-fast px-2"></i>
+        <i class="fa-solid fa-shuffle px-2"></i>
+      </div>
+      <div class="col-1 ms-auto">
+        <i class="fa-solid fa-ellipsis px-2 ms-2"></i>
+        <i class="fa-solid fa-volume-high px-2"></i>
+        <i class="fa-solid fa-up-right-and-down-left-from-center ps-2" onclick="toggleCollapse()"></i>
+        <div class="container mt-4">
+          <div class="collapsible collapsed" id="collapseExample">
+            <div class="row">
+              <div class="col-4 container">
+                <img src="{{url_for('static', filename='img/sample.avif')}}"  class="pt-5 mt-5 px-5 mx-5" alt=""/>
+                <div class="px-5 mx-5 pt-2 mt-2 h5">
+                  Leke Prabhu Ka Naam
+                </div>
+                <div class="px-5 mx-5 py-2 my-2">
+                  Pritam, Arijit Singh, Nikhita Gandhi, Amitabh Bhattacharya
+                </div>
+              </div>
+              <div class="col-6 container">
+                <div class="container border rounded h3 p-5 text-center">
+                  Lyrics
+                  <div class="container border rounded h6 text-center">
+                    <div class="scrollable-container">
+                      <div class="scrollable-content">
+                        <pre>
+Udta Phirta
+Dil Toh Prinda Hai
+Udta Phirta
+
+Hmm.. Katra Katra
+Taphri Pe Zinda Hai
+Katra Katra
+
+Haan Sar Pe Dhunki Sawaar Hai
+Hungama Barkaraar Hai
+Fursat Se Aaj Toh Humein
+Farmana Pyar Vyar Hai
+
+Baithe Baithe Kya Karein
+Ab Karna Hai Kuchh Kaam
+Arey Music Vusic Start Karo
+Bhai Leke Leke Leke Prabhu Ka Naam
+
+Leke Prabhu Ka Naam
+Here We Go!
+
+Arey Music Vusic Start Karo
+Bhai Leke Leke Leke Prabhu Ka Naam
+Leke Prabhu Ka Naam
+
+Naam Naam Naam Naam Naam
+Naam Naam Naam Naam
+Leke Prabhu Ka Naam
+Naam Naam Naam Naam Naam
+Leke Prabhu Ka Naam
+
+Ho Flirtatious
+Ho Contagious
+Ho Kyun Baitha Hai
+Ho So Serious
+
+Aankhon Mein Tevar Hai
+Phir Bhi Dilon Mein Hai
+Jaan Nisaari Jaan Nisaari
+
+Dil Ki Hi Karte Hain
+Koyi Nahi Hai Jawabdari
+
+Ho.. Apne Liye Yoon Toh
+Pad Jaaye Kam Kayanaat Saari
+Kayanaat Saari
+
+Dil Mein Jagah Ho Toh
+De Do Humein Marzi Tumhari
+
+Ho Main Keha
+Ishq Di Feeling Changi Hai
+Sab Ton Rang Berangi Hai
+Ik Word Mein Hi PHD Hai
+Na Comma Na Full Stop
+
+Haan Khud Pe Yeh Aitbaar Hai
+Mauke Ka Intezaar Hai
+Humko Dunia Mein Ishq Ka
+Phailana Karobaar Hai
+
+Baithe Baithe Kya Karein
+Ab Karna Hai Kuchh Kaam
+Arey Music Vusic Start Karo
+Bhai Leke Leke Leke Prabhu Ka Naam
+
+Leke Prabhu Ka Naam
+Here We Go!
+
+Arey Music Vusic Start Karo
+Bhai Leke Leke Leke Prabhu Ka Naam
+Leke Prabhu Ka Naam
+
+Naam Naam Naam Naam Naam
+Naam Naam Naam Naam
+Leke Prabhu Ka Naam
+Naam Naam Naam Naam Naam
+Leke Prabhu Ka Naam
+
+Leke Prabhu Ka Naam
+</pre>
+
+</div>
+</div>
+</div>
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <i class="fa-solid fa-down-left-and-up-right-to-center ps-2"></i> -->
+        </div>
+    </div>
+  </nav>
+  {% include 'footer.html'  %}
+  <br><br>
+  <br>
+<script>
+  console.log(document.cookie)
+const slider = document.getElementById('myRange');
+const progressBar = document.getElementById('progressBar');
+let isDown = false;
+
+slider.addEventListener('mousedown', (e) => {
+  isDown = true;
+  updateProgressBar(e);
+});
+
+slider.addEventListener('mouseup', () => {
+  isDown = false;
+});
+
+slider.addEventListener('mousemove', (e) => {
+  if (isDown) {
+    updateProgressBar(e);
+  }
+});
+
+function updateProgressBar(event) {
+  const sliderRect = slider.getBoundingClientRect();
+  const percentage = (event.clientX - sliderRect.left) / slider.offsetWidth * 100;
+  const clampedPercentage = Math.min(100, Math.max(0, percentage+1));
+  progressBar.style.width = `${clampedPercentage}%`;
+  audio.currentTime = clampedPercentage*audio.duration/100;
+}
+
+const playsong = (element)=>{
+  console.log(element.childNodes[1].childNodes[0].childNodes[0]);
+
+}
+
+let audio = new Audio("{{ url_for('static', filename='music/neighborhood-brandon-hopkins-main-version-22925-01-55.mp3') }}");
+let masterPlay = document.getElementById("masterPlay");
+masterPlay.addEventListener("click",()=>{
+  if(audio.paused || audio.currentTime<=0){
+    audio.play();
+    masterPlay.classList.replace('fa-play','fa-pause');
+  }
+  else{
+    audio.pause();
+    masterPlay.classList.replace('fa-pause','fa-play');
+  }
+})
+audio.addEventListener("timeupdate",()=>{
+  let progressValue = parseInt((audio.currentTime/audio.duration)*100);
+  progressBar.style.width = `${progressValue}%`;
+  console.log(progressValue);
+});
+
+function toggleCollapse() {
+      var collapsible = document.getElementById('collapseExample');
+      collapsible.classList.toggle('collapsed');
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+crossorigin="anonymous"></script>
+<script>
+const search = document.getElementById('search11')
+search.addEventListener('click',()=>{
+  var xmlreq = new XMLHttpRequest();
+  xmlreq.onreadystatechange =   function(){
+    if(this.readyState == 4 &&  this.status == 200){
+      localStorage.setItem('music',this.responseText);
+    }
+  }
+  xmlreq.open('GET','/getnames',true);
+  xmlreq.send();
+})
+search.onkeydown = (e)=>{
+  let musics = JSON.parse(localStorage.getItem('music'));
+  let pattern = new RegExp(`^${e.target.value}`,'i');
+  let ul = document.getElementById('ul');
+  console.log(pattern);
+  // console.log(pattern)
+  ul.innerHTML = "";
+  if(pattern!='/^/i'){
+    for (let music in musics) {
+        for(let i in musics[music]){
+          // console.log(musics[music][i]);
+          if(pattern.test(musics[music][i])){
+            let s ='<li><a class="dropdown-item" href="#">' + musics[music][i]+'</a></li>';
+            ul.innerHTML +=s;
+        }
+      }
+    }
+  }
+  else{
+    ul.innerHTML = '<li><h6 class="dropdown-header">TRENDING NOW</h6></li>'
+  }
+}
+
+</script>
+<script>
+  let playlist = document.getElementById('playlist');
+  let response = document.getElementById('response');
+  let value = document.getElementById('input');
+  let album_name = document.getElementById('album_id');
+  playlist.addEventListener('click',()=>{
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function(){
+      if(this.readyState == 4 &&  this.status == 200){
+        response.innerHTML = '<div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg><div><b>SUCCESS! </b>Song added to your playlist</div></div>'
+        setTimeout(() => {
+  document.location.reload();
+}, 2000);
+      }
+    }
+    let request = "/addplaylist/{{ album['name'] }}/"+value.value;
+    xhttp.open('GET',request,true);
+    xhttp.send();
+})
+</script>
+</body>
+
+</html>

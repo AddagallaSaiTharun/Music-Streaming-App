@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <script src="https://kit.fontawesome.com/eea6921c5e.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/rating.css') }}">
+  <title>Music App</title>
+</head>
+
+<body style="padding: 0%; margin: 0%;">
+  <nav class="navbar shadow sticky-top navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid justify-content-between">
+      <a class="navbar-brand" href="#">Music Streaming</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mx-auto">
+          <div class="d-none d-lg-flex nav-item">
+            <input class="form-control me-2 dropdown-toggle nav-link" type="search" placeholder="&#xF002; Search"
+              aria-label="Search"
+              style=" width: 35rem;z-index: 1; font-family:Arial, Helvetica, sans-serif,FontAwesome;" id="search11"
+              data-bs-toggle="dropdown">
+              <ul class="dropdown-menu" aria-labelledby="search11" id='ul' data-bs-auto-close="true"
+                aria-expanded="false" style="width: 35rem;left: 30%;top: 85%;">
+                <li><h6 class="dropdown-header">Trending Now</h6></li>
+              </ul>
+            </div>
+            </div>
+        <div class="navbar-nav">
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
+          <!-- disabled -->
+          {%if username == 'none' %}
+          <a class="nav-link disabled" href="/creator" tabindex="-1" aria-disabled="true">Creator</a>
+          <a class="nav-link" href="/signin">Login</a>
+          {% else %}
+          <a class="nav-link" href="/creator" tabindex="-1" aria-disabled="true">Creator</a>
+          <div class="nav-item dropstart">
+            <a class="nav-link dropdown-toggle"  id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-circle-user fa-xl"></i></a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+              <li><a class="dropdown-item">{{username}}</a></li>
+              <li><a class="dropdown-item" href="/logout">Logout</a></li>
+            </ul>
+          </div>
+          {% endif%}
+        </div>
+      </div>
+    </div>
+  </nav>
+  <section id="TRENDING" class="container-fluid p-5">
+    <h6>TRENDING NOW</h6>
+    <div class="row">
+      {% for song in release_s %}
+      <br><br><br><br><br><br>
+      <div class="col-2">
+        <div class="card">
+          <div class="image-container">
+            <a href="song/{{ song.song_id }}">
+            <img src="data:image/jpg;base64,{{song.album.image_blob | decodeutf8}}" class="card-img-top" />
+          </a>
+            <div class="hover-overlay">
+                <div class="hover-buttons">
+                  <button class="but"><i class="fa-regular fa-heart fa-sm" data-song_id="{{song.song_id}}" onclick="toggle_liked(this)"></i></button>
+                  <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+                    <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{song.song_id}}">Rate this Song</button></li>
+                  </ul>
+                </div>
+                <div class="play-button" onclick="playsong(this)">
+                  <button class="but"><i class="fa-solid fa-play"><b class="d-none">{{song.song_name}}</b></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <small class="card-title d-block text-center" style="font-size: x-small"><b>{{song.song_name}}</b></small>
+              <small class="card-title d-block text-center" style="font-size: x-small"> {{song.album.artist}} </small>
+            </div>
+        </div>
+      </div>
+      <div class="modal fade" id="exampleModal{{song.song_id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Rating</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Rate song : {{song.song_name}}
+              <form class="rating" action="/rating/{{song.song_id}}" method='post'>
+                  <label>
+                    <input type="radio" name="stars" value="1" />
+                    <span class="icon">★</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="2" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="3" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>   
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="4" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="5" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                  </label>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% for song in songs %}
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="data:image/png;base64,{{song.album.image_blob | decodeutf8}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <button class="but"><i class="fa-regular fa-heart fa-sm" data-song_id="{{song.song_id}}" onclick="toggle_liked(this)"></i></button>
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                  <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+                  <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{song.song_id}}">Rate this Song</button></li>
+               </ul>
+              </div>
+              <div class="play-button" onclick="playsong(this)">
+                <button><i class="fa-solid fa-play"><b class="d-none">{{song.song_name}}</b></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>{{song.song_name}}</b></small>
+            <small class="card-title d-block text-center" style="font-size: x-small"> {{song.album.artist}} </small>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="exampleModal{{song.song_id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Rating</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Rate song : {{song.song_name}}
+              <form class="rating" action="/rating/{{song.song_id}}" method='post'>
+                  <label>
+                    <input type="radio" name="stars" value="1" />
+                    <span class="icon">★</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="2" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="3" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>   
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="4" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="stars" value="5" />
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                    <span class="icon">★</span>
+                  </label>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+    <br>
+    <br>
+    <div class="row">
+      {% for album in release_a %}
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="data:image/png;base64,{{album.image_blob | decodeutf8}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button" onclick="playalbum('{{ album.album_name }}')">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>{{album.album_name}}</b></small>
+            <small class="card-title d-block text-center" style="font-size: x-small">{{album.artist}}</small>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% for album in albums %}
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="data:image/png;base64,{{album.image_blob | decodeutf8}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button  class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button"  onclick="playalbum('{{ album.album_name }}')">
+                <button><i class="fa-solid fa-play"><b class="d-none">{{album.album_name}}</b></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>{{album.album_name}}</b></small>
+            <small class="card-title d-block text-center" style="font-size: x-small">{{album.artist}}</small>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  <section id="NEW-RELEASES" class="container-fluid p-5">
+    <h6>NEW RELEASES</h6>
+    <div class="row">
+      {% for album in new_releases %}
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="data:image/png;base64,{{album.image_blob | decodeutf8}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button  class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button"  onclick="playalbum('{{ album.album_name }}')">
+                <button><i class="fa-solid fa-play"><b class="d-none">{{album.album_name}}</b></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>{{album.album_name}}</b></small>
+            <small class="card-title d-block text-center" style="font-size: x-small">{{album.artist}}</small>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <br>
+    <br>
+
+  </section>
+  <div id="response"></div>
+  <section id="myplaylist" class="container-fluid p-5">
+    <button class="btn btn-primary mx-4" style="float: right;bottom:10%" data-bs-toggle="modal"
+      data-bs-target="#exampleModal">ADD PLAYLIST</button>
+    <h6>YOUR PLAYLIST</h6>
+    {% if username != 'none' %}
+    <br>
+    {% if playlists %}
+    <div class="row">
+      {% for playlist in playlists %}
+      <div class="col-2 ">
+        <a class="card text-reset" href="/playlist/{{playlist.playlist_id}}" style="text-decoration: none;">
+          <div class="image-container">
+            <img src="{{url_for('static', filename='img/music.png')}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button  class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center h5"
+              style="font-size: x-small"><b>{{playlist.playlist_name}}</b></small>
+            </small>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <hr>
+    <div class="h4 text-center">Unlock Your Rhythm: Add a Playlist Today!</div>
+    <hr>
+
+    {% endif %}
+
+    {% else %}
+    <hr>
+    <div class="h4 text-center">Join today and immerse yourself in a world of music. Unlock an array of exciting
+      features to curate your perfect playlists!</div>
+    <hr>
+    {% endif %}
+  </section>
+  <section id="TOP-GENRE" class="container-fluid p-5">
+    <h6>TOP GENRE & MOODS</h6>
+    <div class="row">
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="{{url_for('static', filename='img/rock.jpeg')}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button  class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                  <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+               </ul>
+              </div>
+              <div class="play-button"  onclick="playgenre('rock')">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>Top 50 Rock Songs</b></small>
+          </div> 
+        </div>
+      </div>
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="{{url_for('static', filename='img/pop.jpg')}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button  class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button"  onclick="playgenre('pop')">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>Top 50 Pop Songs</b></small>
+          </div>
+        </div>
+      </div>
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="{{url_for('static', filename='img/sad.jpg')}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button"  onclick="playgenre('sad')">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>Top 50 Sad Songs</b></small>
+          </div> 
+        </div>
+      </div>
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="{{url_for('static', filename='img/romance.jpg')}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button"  onclick="playgenre('romance')">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>top 50 romance songs</b></small>
+          </div>
+        </div>
+      </div>
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="{{url_for('static', filename='img/hiphop.jpg')}}" class="card-img-top" />
+            <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button"  onclick="playgenre('hiphop')">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>Top 50 Hip-Hop Songs</b></small>
+          </div>
+        </div>
+      </div>
+      <div class="col-2 ">
+        <div class="card">
+          <div class="image-container">
+            <img src="{{url_for('static', filename='img/electro.jpg')}}" class="card-img-top" />
+             <div class="hover-overlay">
+              <div class="hover-buttons">
+                <!-- <button class="but"><i class="fa-regular fa-heart fa-sm"></i></button> -->
+                <button type="button" class="btn btn-secondary dropdown-toggle but" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-ellipsis"></i></button>
+               <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                <li><button class="dropdown-item" type="button">Add to Queue</button></li>
+              </ul>
+              </div>
+              <div class="play-button"  onclick="playgenre('electro')">
+                <button><i class="fa-solid fa-play"></i></button>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body">
+            <small class="card-title d-block text-center" style="font-size: x-small"><b>Top 50 Electro Songs</b></small>
+          </div>
+        </div>
+      </div>
+      </div>
+    <br>
+    <br>
+  </section>
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="h6">Create a New Playlist</div>
+          <form class="form-floating m-0 p-0">
+            <input type="text" class="form-control" id="input" placeholder="PLAYLIST NAME" required>
+            <label for="input">YOUR NEW PLAYLIST NAME</label>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id='playlist' data-bs-dismiss="modal">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <nav class="navbar fixed-bottom navbar-light bg-light p-0">
+    <div class="col-12">
+      <div class="slider" id="myRange" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress bg-success progress-bar-striped progress-bar-animated" id="progressBar"></div>
+      </div>
+    </div>
+    <div class="container-fluid  p-3 py-2 ">
+      <div class="col-1">
+        <img src="{{url_for('static', filename='img/music.png')}}" style="width: 45%;" class="img"  id="nav-img"/>
+      </div>
+      <div class="col-2" style="margin-left: -3%;">
+        <div style="font-size: x-small;">
+          <h6 class="name_song">music name</h6>
+        </div>
+        <div style="font-size: x-small;" class="song_artist">
+          music artist
+        </div>
+      </div>
+      <div class="mx-auto">
+        <!-- <i class="fa-solid fa-repeat ps-2 mx-1"></i> -->
+        <i class="fa-solid fa-backward-fast px-2"></i>
+        <i class="fa-solid fa-play px-2" id="masterPlay"></i>
+        <!-- <i class="fa-solid fa-pause"></i> -->
+        <i class="fa-solid fa-forward-fast px-2"></i>
+        <!-- <i class="fa-solid fa-shuffle px-2"></i> -->
+      </div>
+      <div class="col-1 ms-auto">
+        <i class="fa-solid fa-ellipsis px-2 ms-2"></i>
+        <!-- <i class="fa-solid fa-volume-high px-2"></i> -->
+        <i class="fa-solid fa-up-right-and-down-left-from-center ps-2" onclick="toggleCollapse()"></i>
+        <div class="container mt-4">
+          <div class="collapsible collapsed" id="collapseExample">
+            <div class="row">
+              <div class="col-4 container">
+                <img src="{{url_for('static', filename='img/music.png')}}" class="pt-5 mt-5 px-5 mx-5 img" alt=""
+                   >
+                <div class="px-5 mx-5 pt-2 mt-2 h5 name_song">
+                  music name
+                </div>
+                <div class="px-5 mx-5 py-2 my-2 song_artist">
+                  music artist
+                </div>
+              </div>
+              <div class="col-6 container">
+                <div class="container border rounded h3 p-5 text-center">
+                  Lyrics
+                  <div class="container border rounded h6 text-center">
+                    <div class="scrollable-container">
+                      <div class="scrollable-content">
+                        <span class="lyrics">
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <i class="fa-solid fa-down-left-and-up-right-to-center ps-2"></i> -->
+      </div>
+    </div>
+  </nav>
+  {% include 'footer.html' %}
+  <br><br>
+  <br>
+<script src="{{ url_for('static', filename='queue.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<script>
+  const search = document.getElementById('search11')
+  let song_id = document.getElementById('songs');
+  let album_id = document.getElementById('albums');
+  search.addEventListener('click', () => {
+    var xmlreq = new XMLHttpRequest();
+    xmlreq.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        localStorage.setItem('music', this.responseText);
+      }
+    }
+    xmlreq.open('GET', '/getnames', true);
+    xmlreq.send();
+    let songs = JSON.parse(localStorage.getItem('music'))['trend'];
+    let t = '<li><h5 class="dropdown-header">Trending Now</h5></li>';
+      for(song of songs){
+        t += '<li><a class="dropdown-item" href=song/'+song[0]+">" + song[1] + '</a></li>'
+      }
+      ul.innerHTML = t;
+  })
+  search.onkeydown = (e) => {
+    let data = JSON.parse(localStorage.getItem('music'));
+    let songs = data['songs'];
+    let albums = data['albums'];
+    let trend = data['trend'];
+    let pattern = new RegExp(`^${e.target.value}`, 'i');
+    let ul = document.getElementById('ul');
+    song_id = ul;
+    album_id = ul;
+    let flag1 = false;
+    let flag2 = false;
+    song_id.innerHTML = "";
+    album_id.innerHTML = "";
+    console.log(pattern)
+    let s = '<li><h6 class="dropdown-header">Songs</h6></li>'
+    let a = '<li><h6 class="dropdown-header">Albums</h6></li>'
+    if (pattern != '/^/i') {
+      for(song of songs){
+        if (pattern.test(song[1])) {
+          s += '<li><a class="dropdown-item" href=song/'+song[0]+">" + song[1] + '</a></li>';
+          flag1=true;
+        }
+      }
+      for(album of albums){
+        if (pattern.test(album[1])) {
+            // album_id.style.display = 'block'; 
+            a += '<li><a class="dropdown-item" href=album/'+album[0]+">" + album[1] + '</a></li>';
+            flag2=true;
+          }
+      }
+      if(flag1){
+        ul.innerHTML+=s;
+      }
+      if(flag2){
+        ul.innerHTML+=a;
+      }
+      if(!flag1 && !flag2){
+        ul.innerHTML = "No Album or Song Found"
+      }
+    }
+    else {
+      let t = '<li><h5 class="dropdown-header">Trending Now</h5></li>';
+      for(song of songs){
+        t += '<li><a class="dropdown-item" href=song/'+song[0]+">" + song[1] + '</a></li>'
+      }
+      ul.innerHTML = t;
+      }
+  }
+
+</script>
+<script>
+  let playlist = document.getElementById('playlist');
+  let response = document.getElementById('response');
+  let value = document.getElementById('input');
+  playlist.addEventListener('click', () => {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        response.innerHTML = '<div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg><div><b>SUCCESS! </b>Now you can add songs to your playlist</div></div>'
+        setTimeout(() => {
+          document.location.reload();
+        }, 2000);
+      }
+    }
+    let request = '/newplaylist/' + value.value;
+    xhttp.open('GET', request, true);
+    xhttp.send();
+  })
+  $(':radio').change(function() {
+  console.log('New star rating: ' + this.value);
+});
+</script>
+<script>
+  document.addEventListener(onload,()=>{
+    let liked_classes = document.querySelectorAll(".fa-heart");
+    for(let liked_class in liked_classes){
+      let song_id = liked_class.dataset.song_id;
+      fetch('/song_liked/'+song_id).then(
+        response => {
+          return response.text;
+        }
+      ).then(
+        data=>{
+          if(data == '1'){
+            liked_class.classList.replace("fa-regular","fa-solid");
+          }
+          else{
+            liked_class.classList.replace("fa-solid","fa-regular");
+          }
+        }
+      )
+    }
+  })
+
+</script>
+<script>
+  const toggle_liked = (element)=>{
+    if(element.classList.contains('fa-regular')){
+      element.classList.replace('fa-regular','fa-solid');
+      fetch("/liked_song/"+element.dataset.song_id);
+    }
+    else{
+      element.classList.replace('fa-solid','fa-regular');
+      fetch("/disliked_song/"+element.dataset.song_id);
+    }
+  }
+</script>
+</body>
+
+</html>

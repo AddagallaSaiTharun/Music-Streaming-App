@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+    <script src="https://kit.fontawesome.com/eea6921c5e.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <style>
+    /* body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0px;
+      } */
+    #container1 {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="file"],
+    .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
+
+    .form-group button[type="submit"] {
+      background-color: #4caf50;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .form-group input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+  </style>
+  <title>Music App</title>
+</head>
+
+<body>
+  <nav class="navbar shadow sticky-top navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid justify-content-between">
+      <a class="navbar-brand" href="#">Music Streaming</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mx-auto">
+          <form class="d-flex" method="get">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+              style="width: 35rem" />
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form>
+        </div>
+        <div class="navbar-nav">
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
+          <a class="nav-link" href="/" tabindex="-1" aria-disabled="true">User</a>
+          {% if username == 'none' %}
+          <a class="nav-link" href="/login">Login</a>
+          {% else %}
+          <a class="nav-link" href="/logout">{{username}}</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+  {% if registered == -1 %}
+  <section class="hero my-5">
+    <div class="container text-center">
+      <h1>Welcome to our platform</h1>
+      <p>Join us and register as a creator!</p>
+      <form action="/change_role" method="post">
+        <button id="registerBtn" class="btn btn-primary btn-lg" type="submit">
+          Register as Creator
+        </button>
+      </form>
+    </div>
+  </section>
+  {% elif registered == 0 %}
+  <section class="hero my-5">
+    <div class="container text-center"> 
+      <h1>Unleash Your Musical Muse:</h1>
+      <p>Pioneering Your Journey Through Song Uploads</p>
+      <form action="{{ url_for('upload') }}",method="GET">
+        <button id="registerBtn" class="btn btn-primary btn-lg" type="submit">
+          Upload your album
+        </button>
+      </form>
+    </div>
+  </section>
+
+  {% else %}
+  <h2 class="container-fluid">Dashboard</h2>
+  <div class="my-5 shadow text-center hero py-5">
+    <div class="statistics row">
+      <div class="statistic-card col-3">
+        <h3>Total Songs Uploaded</h3>
+        <p id="totalSongs">{{details['songcount']}}</p>
+      </div>
+      <div class="statistic-card col-3">
+        <h3>Average Likes</h3>
+        <p id="mostPopularSong">{{ details['averagelikes'] }}</p>
+      </div>
+      <div class="statistic-card col-3">
+        <h3>Most Popular Song</h3>
+        <p id="mostPopularSong">{{ details['popular'] }}</p>
+      </div>
+      <div class="statistic-card col-3">
+        <h3>No Of Viewers</h3>
+        <p id="totalPlays">{{ details['totalviews'] }}</p>
+      </div>
+    </div>
+
+  </div>
+
+  <span class="container-fluid h2"> YOUR ALBUMS</span>
+  <form action="/uploadalbum">
+    <span><button class="btn btn-primary mx-4" style="float: right;">Upload New Album</button></span>
+  </form>
+  <div class="my-5 text-center hero py-5 mx-2 px-2">
+    <div id="response"></div>
+    <hr>
+    {% for i in range(albums['count']) %}
+    <div class="accordion accordion-flush" id="Album-{{i}}">
+      <div class="accordion-item p-3">
+        <h2 class="accordion-header  d-flex align-items-center" id="Album-{{i}}heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+          data-bs-target="#Album-{{i}}details" aria-expanded="false" aria-controls="Album-{{i}}details">
+          {{albums['albums'][i]['album_name']}}
+        </button>
+        <a href="/uploadsongs/{{ albums['albums'][i]['album_name'] }}">
+          <i class="fa-solid fa-plus fa-xs ps-2"></i>
+        </a>
+        </h2>
+        <div id="Album-{{i}}details" class="accordion-collapse collapse show" aria-labelledby="Album-{{i}}heading"
+          data-bs-parent="#Album-{{i}}">
+          <div class="accordion-body">
+            <hr>
+            {% for j in range(albums['albums'][i]['songs']['count']) %}
+            <div class="accordion accordion-flush" id="Song-{{i}}{{j}}">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="Song-{{i}}{{j}}heading">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#Song-{{i}}{{j}}details" aria-expanded="false" aria-controls="Song-{{i}}{{j}}heading">
+                    <div class="col-3">
+                      Song Name: <span>{{albums['albums'][i]['songs']['song'][j]['songname']}}</span>
+                    </div>
+                    <div class="col-3">
+                      Views: <span>{{albums['albums'][i]['songs']['song'][j]['views']}}</span>
+                    </div>
+                    <div class="col-3">
+                      Liked: <span>{{albums['albums'][i]['songs']['song'][j]['liked']}}</span>
+                    </div>
+                    <div class="col-3">
+                      Average Rating: <span>{{albums['albums'][i]['songs']['song'][j]['liked']}}</span>
+                    </div>
+                  </button>
+                </h2>
+                <div id="Song-{{i}}{{j}}details" class="accordion-collapse collapse" aria-labelledby="Song-{{i}}{{j}}heading"
+                  data-bs-parent="#Song-{{i}}{{j}}">
+                  <div class="accordion-body row">
+                    <button class="btn btn-primary col-3 ms-5 me-2" data-bs-toggle="modal" data-bs-target="#exampleModal-{{i}}{{j}}-lyrics">
+                      Lyrics
+                    </button>
+                    <button class="btn btn-primary col-3 mx-2" data-bs-toggle="modal" data-bs-target="#exampleModal-{{i}}{{j}}-edit-lyrics">
+                      Edit
+                    </button>
+                    <button class="btn btn-primary col-3 mx-2"  data-bs-toggle="modal" data-bs-target="#exampleModal-{{i}}{{j}}-delete">
+                      Delete 
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+
+<!-- Modal-Lyrics -->
+<div class="modal fade" id="exampleModal-{{i}}{{j}}-lyrics" tabindex="-1" aria-labelledby="exampleModalLabel-{{i}}{{j}}-lyrics" aria-hidden="true">
+  <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ps-5" id="exampleModalLabel-{{i}}{{j}}-lyrics">Lyrics</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          {{albums['albums'][i]['songs']['song'][j]['lyrics']}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal-edit -->
+<div class="modal fade" id="exampleModal-{{i}}{{j}}-edit-lyrics" tabindex="-1" aria-labelledby="exampleModalLabel-{{i}}{{j}}-edit-lyrics" aria-hidden="true">
+  <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ps-5" id="exampleModalLabel-{{i}}{{j}}-edit-lyrics">EDIT</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="modal-body" action="/save_changes/{{albums['albums'][i]['songs']['song'][j]['id']}}" method="POST">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon-{{i}}{{j}}">Song Name: </span>
+          <input type="text" class="form-control" placeholder="Song Name" aria-describedby="basic-addon-{{i}}{{j}}" style="width: 20%;" value="{{albums['albums'][i]['songs']['song'][j]['songname']}}" name="song-name">
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text">Lyrics</span>
+          <textarea class="form-control" rows="10" cols="50" placeholder="Lyrics" name="lyrics">{{albums['albums'][i]['songs']['song'][j]['lyrics']}}</textarea>
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon-{{i}}{{j}}-duration">Duration:</span>
+          <input type="text" class="form-control" placeholder="Duration in Seconds" aria-describedby="basic-addon-{{i}}{{j}}-duration" style="width: 20%;" value="{{albums['albums'][i]['songs']['song'][j]['duration']}}" name="duration">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-outline-success" data-bs-dismiss="modal">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal-Lyrics -->
+<div class="modal fade" id="exampleModal-{{i}}{{j}}-lyrics" tabindex="-1" aria-labelledby="exampleModalLabel-{{i}}{{j}}-lyrics" aria-hidden="true">
+  <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ps-5" id="exampleModalLabel-{{i}}{{j}}-lyrics">Lyrics</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {{albums['albums'][i]['songs']['song'][j]['lyrics']}}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal-delete -->
+<div class="modal fade" id="exampleModal-{{i}}{{j}}-delete" tabindex="-1" aria-labelledby="exampleModalLabel-{{i}}{{j}}-delete" aria-hidden="true">
+  <div class="modal-dialog  modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title ps-5" id="exampleModalLabel-{{i}}{{j}}-delete">Deleting Song</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <pre>
+Are you sure you want to delete the song <b>" {{albums['albums'][i]['songs']['song'][j]['songname']}} "</b> ?
+        </pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> 
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="func_delete('{{albums['albums'][i]['songs']['song'][j]['id']}}')">DELETE</button> 
+      </div>
+    </div>
+  </div>
+</div>
+
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% include 'footer.html' %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+    <script>
+      let response = document.getElementById('response');
+      const func_delete = (song_id)=>{
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function (){
+          if(this.readyState == 4 && this.status == 200){
+            response.innerHTML = '<div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg><div><b>SUCCESSFULLY DELETED!</b></div></div>'
+            setTimeout(() => {
+              document.location.reload();
+            }, 3000);
+          }
+        }
+        let request = '/delete_song/'+song_id;
+        xhttp.open("GET",request,true);
+        xhttp.send();
+      }
+      </script>
+</body>
+
+</html>

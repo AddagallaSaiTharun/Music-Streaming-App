@@ -1,0 +1,15 @@
+/* Add custom styles here if needed */
+.hero {
+    background-color: #f8f9fa;
+    padding: 200px 0;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
